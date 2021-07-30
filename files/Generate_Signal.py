@@ -1,5 +1,5 @@
 """
-
+Code for generating a QAM signal and saving it to a file
 """
 
 from qampy import signals, impairments, equalisation, phaserec, helpers
@@ -37,19 +37,11 @@ def encode_data(sig, data, data2=[]):
     return [sig, encoded_signal]
 
 
-def save_base_signal(sig, filename):
-    """
-    Saves base signal using pickle compression
-    """
-    sig.save_to_file(filename)
-
-    return 
-
 def save_sig_data_to_file(sig, path="C:/Users/wamcc1/Documents/QAM_sig", filename="sig_data.txt"):  # TO DO: save original signal data + noisy signal E as pickle
     """
     Saves sig to a txt file with given path and filename. If path and/or does not exist, creates it.
 
-     Parameters
+    Parameters
     ---------------------------------------------
     sig : SignalQAMGrayCoded
         Signal that is to be saved to a file
@@ -94,6 +86,25 @@ def save_sig_data_to_file(sig, path="C:/Users/wamcc1/Documents/QAM_sig", filenam
 def generate_AWG_signal(M, N, nmodes=2, fs=1, fb=1, shift=0, **kwargs):
     """
     Generates a signal that gets resampled at the output DAC
+
+    Parameters
+    ---------------------------------------------
+    M : Integer
+        QAM-order, should be a power of 2, ie. M=2^x for x being some integer
+    N : Integer
+        Path of where file is to be saved
+    nmodes : Integer
+        Number of polarisations, 1=single polarisation, 2=dual polarisation
+    fs : Integer
+        Sampling frequency of output DAC
+    fb : Integer
+        Baud rate of AWG (symbols/s)
+    shift : 
+
+    Output
+    ---------------------------------------------
+    signal_to_be_transmitted : SignalQAMGrayCoded
+        Generated signal
     """
     if "beta" in kwargs:
         beta = kwargs.pop("beta")
@@ -107,7 +118,7 @@ def generate_AWG_signal(M, N, nmodes=2, fs=1, fb=1, shift=0, **kwargs):
     signal_to_be_transmitted = sig.resample(fs, beta=beta)
 
     return signal_to_be_transmitted 
-    return sig
+
 
 def plot_constellation(E, title="QPSK signal constellation"):
     """
