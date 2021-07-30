@@ -1,5 +1,7 @@
 """
-
+Code for adding impairments to a signal, such as delay, noise and simulating hardware.
+Author: William McCallum
+Last Updated: 5/7/21
 """
 
 from qampy import signals, impairments, equalisation, phaserec, helpers
@@ -64,7 +66,7 @@ def delay(sig, shift, nmodes):  # to do: shift by fraction amount, by first upsa
 
     return sig
 
-def simulate_AWG(sig, upsample_multiplier=4, scope_rate=80e9):
+def simulate_AWG(sig, upsample_multiplier=4, scope_rate=80e9, delay_max_offset=1):
     """
     Simulates the AWG by upsampling the signal, delaying it by a random amount, then downsampling to scope sample rate
 
@@ -74,8 +76,10 @@ def simulate_AWG(sig, upsample_multiplier=4, scope_rate=80e9):
         Signal that is to be simulated by AWG
     upsample_multiplier : float
         How much the sample rate is multiplied by
-    scope_rate : 
+    scope_rate : float
         Sample rate of the oscilloscope, default 80GS/s
+    delay_max_offset : float
+        Maximum amount that signal is delayed, 1 means that signal can be delayed by up to 1 full signal length
 
     Output
     ---------------------------------------------
@@ -87,7 +91,7 @@ def simulate_AWG(sig, upsample_multiplier=4, scope_rate=80e9):
 
     # Delay by random amount
     N = len(sig[0]) + len(sig[1]) # total number of symbols in signal
-    shift = np.random.randint(-N/2, N/2, 1) # randomly shift to signal by up to 1/2 signal length in either direction
+    shift = np.random.randint(-delay_max_offset*N, delay_max_offset*N, 1) # randomly shift to signal by up to 1/2 signal length in either direction
     AWG_sig = delay(sig, shift, sig.nmodes)
     # interpolate signal here
 

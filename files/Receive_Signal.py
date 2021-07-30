@@ -1,5 +1,7 @@
 """
-
+Functions used to receive a signal from a file, remove any impairments, and recover the original signal
+Author: William McCallum
+Last Updated: 5/7/21
 """
 
 from qampy import signals, impairments, equalisation, phaserec, helpers
@@ -88,7 +90,8 @@ def recover_signal(sig):
     """
     Attempts to recover original signal at receiver
     """
-    wxy, err = equalisation.equalise_signal(sig, 2e-3, Ntaps=17, method="mddma")
+    print(sig.shape)
+    wxy, err = equalisation.equalise_signal(sig, 2e-3, Ntaps=7, method="mddma")
 
     ## plots estimation of error
     #fig = figure(title="Error", output_backend="webgl")
@@ -104,13 +107,15 @@ def recover_signal(sig):
     # fig.xaxis[0].axis_label = "tap"
     # fig.yaxis[0].axis_label = "weight"
     #show(fig)
-
     sig_out = equalisation.apply_filter(sig, wxy)
-
+    print(sig_out.shape)
     # sig_out2, ph = phaserec.viterbiviterbi(sig_out, 11) # find phase recovery for 16-qam
     sig_out2, ph = phaserec.bps(sig_out, 36, 11) # what are good values for #test angles and block length?
+    print(sig_out2.shape)
     sig_out2 = helpers.normalise_and_center(sig_out2)
-    sig_out2 = helpers.dump_edges(sig_out2, 10)
+    print(sig_out2.shape)
+    sig_out2 = helpers.dump_edges(sig_out2, 10)     # check if errors are concentrated at edges
+    print(sig_out2.shape)
     #print("SER = ",sig_out2.cal_ser())
     #print("BER = ", sig_out2.cal_ber())
     return sig_out2
