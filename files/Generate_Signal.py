@@ -8,6 +8,28 @@ from bokeh.io import output_notebook
 from bokeh.plotting import figure, show
 import os
 
+def add_edges(sig, edge_size, nmodes=2):
+    """
+    Adds edges to either side of signal filled with 0's of length edge_size
+
+    Parameters
+    ---------------------------------------------
+    sig : SignalQAMGrayCoded
+        Signal that is to have edges added to
+    edge_size : integer
+        length of edges to be added to each side of signal. Edges are made of 0's
+
+    Output
+    ---------------------------------------------
+    sig : SignalQAMGrayCoded
+        Signal that has had edges added
+    """
+    sig_temp = sig      # gets temporary signal
+    arr_0 = np.zeros((nmodes, edge_size))    # gets array of zeros
+    sig_temp = np.concatenate((sig_temp, arr_0), axis=1)   # adds 0's to end of signal
+    sig_temp = np.concatenate((arr_0, sig_temp), axis=1)   # adds 0's to start of signal
+    out_sig = sig.recreate_from_np_array(sig_temp)  # gets rebuilt signal
+    return out_sig
 
 def generate_random_data(length):
     """
@@ -119,6 +141,39 @@ def generate_AWG_signal(M, N, nmodes=2, fs=1, fb=1, shift=0, **kwargs):
 
     return signal_to_be_transmitted 
 
+def copy_sig(sig, n):
+    """
+    Copies a signal n times and returns the rebuilt signal
+
+    Parameters
+    ---------------------------------------------
+    sig : SignalQAMGrayCoded
+        Signal to have its data copied and then rebuilt
+    n : float
+        number of times signal should be copied. For full waveform recovery, n>=2
+
+    Output
+    ---------------------------------------------
+    rebuilt_sig : SignalQAMGrayCoded
+        Signal that has the data of sig copied n times
+    """
+    sig_temp = sig  # gets temporary signal 
+
+    # checks if n is a whole number
+    if math.floor(n) == n:
+        sig_temp = np.tile(sig_temp, n)
+
+    # not currently working, to be fixed
+    else:       # if n is a fraction
+        slice = math.floor((n % 1) * len(sig_temp))   # gets how many array elements are in fractional part of n
+        frac_temp = sig_temp[:slice]    # gets copy of signal of length equal to fractional part of n
+        sig_temp = np.tile(sig_temp, math.floor(n)) # gets floor(n) copies of original signal
+        sig_temp = np.append(sig_temp, frac_temp)   # combines fractional and whole copies of signal
+        print(sig[0])
+        print(frac_temp[0])
+
+    rebuilt_sig = sig.recreate_from_np_array(sig_temp)  # gets rebuilt signal
+    return rebuilt_sig
 
 def plot_constellation(E, title="QPSK signal constellation"):
     """

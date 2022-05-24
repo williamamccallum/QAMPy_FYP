@@ -119,3 +119,52 @@ def recover_signal(sig):
     #print("SER = ",sig_out2.cal_ser())
     #print("BER = ", sig_out2.cal_ber())
     return sig_out2
+
+def recover_full_waveform(sig, orig_sig, frac_upscale=0):
+    """
+    Takes in a signal with multiple copies of a data packet and a delay, and recovers the original waveform
+
+    Parameters
+    ---------------------------------------------
+    sig : SignalQAMGrayCoded
+        Signal to have its data recovered
+    orig_sig : SignalQAMGrayCoded
+        Original signal to synchronise sig with
+    frac_upscale : int
+        if 0, no fractional delay. Else, gives how much the signal should be upsampled from the baud rate to make the fractional delay an integer delay, and hence recoverable
+        Note that signal data will be returned at the upsampled frequency
+
+    Output
+    ---------------------------------------------
+    tx_data : array
+        recovered waveform synced to original
+    rx_data : array
+        Original waveform data
+    """
+    if frac_upscale == 0:   # if there is no fractional delay
+         # syncs signals
+        [tx_data, rx_data] = sig._sync_and_adjust(sig, orig_sig) 
+        recovered_sig  = orig_sig.recreate_from_np_array(tx_data)
+        orig_sig  = orig_sig.recreate_from_np_array(rx_data)
+        return [recovered_sig, orig_sig]
+    else:                   # if there is a fractional delay
+        # upscales signals accordingly
+
+        sig = sig.resample(orig_sig.fb*frac_upscale)
+        print("signal fb: %d" % sig.fs)
+        upsampled_sig = orig_sig.resample(orig_sig.fb*frac_upscale)
+        print("original signal fb: %d" % upsampled_sig.fs)
+        # syncs signals for fractional delay
+        [tx_data, rx_data] = sig._sync_and_adjust(sig, upsampled_sig) 
+        # recovers signal
+        #upsampled_sig = orig_sig.resample(orig_sig.fb*frac_upscale)     # upsamples original signal to use as base to recover signal waveform from tx data
+        recovered_sig  = upsampled_sig.recreate_from_np_array(tx_data)
+        # lowers signal to baud rate
+        orig_sig = orig_sig.resample(orig_sig.fb*2, beta=0.1)
+        recovered_sig = recovered_sig.resample(orig_sig.fb*2, beta=0.1)
+        # syncs signals for large delay
+        [tx_sig, rx_sig] = recover_full_waveform(recovered_sig, orig_sig, 0)
+        recovered_sig2  = orig_sig.recreate_from_np_array(tx_sig)
+        orig_sig2  = orig_sig.recreate_from_np_array(rx_sig)
+        recovered_sig2 = recovered_sig2.resample(orig_sig.fb, beta=0.1)
+        return [recovered_sig2, orig_sig2]
