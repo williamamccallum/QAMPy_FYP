@@ -1,7 +1,7 @@
 """
 Code for adding impairments to a signal, such as delay, noise and simulating hardware.
 Author: William McCallum
-Last Updated: 5/7/21
+Last Updated: 24/5/22
 """
 
 from qampy import signals, impairments, equalisation, phaserec, helpers
@@ -35,11 +35,6 @@ def add_noise(sig, snr, df=100e3):
 
     return noisy_signal
 
-def Interpolate_Signal(sig):
-    """
-
-    """
-    return interpolated_sig
 
 def delay(sig, shift, nmodes=2):
     """
