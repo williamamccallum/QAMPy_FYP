@@ -44,8 +44,6 @@ with open(filename, "wb") as f:
             break
         # write to the file the bytes we just received
         f.write(bytes_read)
-        # update the progress bar
-        progress.update(len(bytes_read))
 
 # close the client socket
 client_socket.close()
