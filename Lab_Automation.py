@@ -280,9 +280,9 @@ if __name__ == "__main__":
     recover_signal = True
     output_results = False
 
-    awg_name = 'TCPIP0::169.254.53.84::inst1::INSTR'  # gives the VISA name of the AWG
-    osc_name = 'TCPIP0::169.254.42.221::inst0::INSTR'  # gives the VISA name of the oscilloscope
-    server_ip = "169.254.53.84"
+    awg_name = 'TCPIP0::inst1::INSTR'  # gives the VISA name of the AWG
+    osc_name = 'TCPIP0::inst0::INSTR'  # gives the VISA name of the oscilloscope
+    server_ip = "192.168.0.1"
     server_port = "5001"
     seg_len = 64  # length of a segment of the signal
     if gen_sig:
